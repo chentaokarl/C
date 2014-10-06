@@ -17,5 +17,5 @@ int main(void) {
 }
 
 void A(){
-	pringtf("Enter ")
+	pringtf("Enter <A>");
 }
