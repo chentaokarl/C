@@ -16,6 +16,13 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
+char nextToken;
+
 void A(){
 	pringtf("Enter <A>");
+
+	/* Determine which RHS */
+	if(nextToken == 'a' || nextToken == 'b' || nextToken == 'c'){
+
+	}
 }
