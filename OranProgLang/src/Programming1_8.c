@@ -1,12 +1,10 @@
 /*
  ============================================================================
- Name        : OranProgLang.c
- Author      :
- Version     :
- Copyright   : Your copyright notice
+ Name        : Programming1_8.c
+ Author      : Chen Tao (Karl)
  Description : Rules from problem 1:
  	 	 	 	 A-->aB|b|cBB
- 	 	 	 	 B-->aB|bA|cBb
+ 	 	 	 	 B-->aB|bA|cBb (corrected the original rule B-->aB|bA|aBb)
  	 	 	 	 C-->aaA|b|caB
  ============================================================================
  */
@@ -18,37 +16,21 @@
 
 /* Global declarations */ /* Variables */
 int charClass;
-char lexeme [100];
 char nextChar;
-int lexLen;
-int token;
-int nextToken;
 FILE *in_fp, *fopen();
 
 /* Function declarations */
-void addChar();
-void getChar();
-void getNonBlank();
-int lex();
-void A();
-void error();
+void getChar();     //get next char from file
+void getNonBlank(); //get next non blank char
+int lex(); 			//judge if the char is legal
+void A();			//parse rule A-->aB|b|cBB
+void B();			//parse rule B-->aB|bA|cBb
+void C();			//parse rule C-->aaA|b|caB
+void error(char[]); //print detail error message to user
 
 /* Character classes */
 #define LETTER 0
-#define DIGIT 1
 #define UNKNOWN 99
-
-/* Token codes */
-#define INT_LIT 10
-#define IDENT 11
-#define ASSIGN_OP 20
-#define ADD_OP 21
-#define SUB_OP 22
-#define MULT_OP 23
-#define DIV_OP 24
-#define LEFT_PAREN 25
-#define RIGHT_PAREN 26
-
 
 /* main driver */
 main() {
@@ -57,23 +39,10 @@ main() {
 		printf("ERROR - cannot open 1_8.in \n");
 	else {
 		getChar();
-//		do {
-//			lex();
-//		} while (nextToken != EOF);
 		A();
 	}
 }
 
-/*****************************************************/
-/* addChar - a function to add nextChar to lexeme */
-void addChar() {
-	if (lexLen <= 98) {
-		lexeme[lexLen++] = nextChar;
-		lexeme[lexLen] = 0;
-	}
-	else
-		printf("Error - lexeme is too long \n");
-}
 
 /*****************************************************/
 /* getChar - a function to get the next character of input and determine its character class */
@@ -96,126 +65,109 @@ void getNonBlank() {
 
 /******************************************************/
 /* lex - a simple lexical analyzer for arithmetic expressions */
-int lex() {
-	lexLen = 0;
+void lex() {
 	getNonBlank();
 	switch (charClass) {
-		/* Parse identifiers */
 		case LETTER:
-			addChar();
-			getChar();
-			while (charClass == LETTER || charClass == DIGIT) {
-				addChar();
-				getChar();
-			}
-			nextToken = IDENT;
 			break;
-		/* Parse integer literals */
-		case DIGIT:
-			addChar();
-			getChar();
-			while (charClass == DIGIT) {
-				addChar();
-				getChar();
-			}
-			nextToken = INT_LIT;
-			break;
-		/* Parentheses and operators */
 		case UNKNOWN:
-			lookup(nextChar);
-			getChar();
+			error("Only lower case letter can be parsed");
+			while (charClass != LETTER)
+				getChar();
 			break;
 		/* EOF */
 		case EOF:
-			nextToken = EOF;
-			lexeme[0] = 'E';
-			lexeme[1] = 'O';
-			lexeme[2] = 'F';
-			lexeme[3] = 0;
+			nextChar = EOF;
 			break;
 	} /* End of switch */
 
-￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼    printf("Next token is: %d, Next lexeme is %s\n", nextToken, lexeme);
-	return nextToken;
+    printf("Next char is %s\n", nextChar);
 } /* End of function lex */
 
+/*****************************************************/
 void A(){
-	pringtf("Enter <A>");
+	printf("Enter <A>");
 
 	/* Determine which RHS A-->aB|b|cBB */
-	if(nextToken == 'a'){ //A-->aB
+	if(nextChar == 'a'){ //A-->aB
 		/* get the next token */
 		lex();
 		B();
 	}
-	else if(nextToken == 'b'){ //A-->b
+	else if(nextChar == 'b'){ //A-->b
 		lex();
 	}
-	else if(nextToken == 'c'){ //A-->cBB
+	else if(nextChar == 'c'){ //A-->cBB
 		lex();
 		B();
 		B();
 	}
 	else
-		error();
+		error("For rule A-->aB|b|cBB, input should started with 'a', 'b' or 'c'. ");
 
-	pringtf("Exit <A>");
+	printf("Exit <A>");
 }
 
+/*****************************************************/
 void B(){
-	pringtf("Enter <B>");
+	printf("Enter <B>");
 
 	/* Determine which RHS   B-->aB|bA|cBb */
-	if(nextToken == 'a'){ //B-->aB
+	if(nextChar == 'a'){ //B-->aB
 		/* get the next token */
 		lex();
 		B();
 	}
-	else if(nextToken == 'b'){ //B-->bA
+	else if(nextChar == 'b'){ //B-->bA
 		lex();
 		A();
 	}
-	else if(nextToken == 'c'){ //B-->cBb
+	else if(nextChar == 'c'){ //B-->cBb
 		lex();
 		B();
-		if(nextToken == 'b')
+		if(nextChar == 'b')
 			lex();
 		else
-			error();
+			error("For rule B-->cBb should ended with letter 'b'.");
 	}
 	else
-		error();
+		error("For rule B-->aB|bA|cBb, input should started with 'a', 'b' or 'c'. ");
 
-	pringtf("Exit <B>");
+	printf("Exit <B>");
 }
 
 
+/*****************************************************/
 void C(){
-	pringtf("Enter <C>");
+	printf("Enter <C>");
 
 	/* Determine which RHS   C-->aaA|b|caB */
-	if(nextToken == 'a'){   //C-->aaA
+	if(nextChar == 'a'){   //C-->aaA
 		/* get the next token */
 		lex();
-		if(nextToken == 'a')
+		if(nextChar == 'a')
 			lex();
 		else
-			error();
+			error("For rule C--aaA, input should started with 'aa'. ");
 		A();
 	}
-	else if(nextToken == 'b'){ //C-->b
+	else if(nextChar == 'b'){ //C-->b
 		lex();
 	}
-	else if(nextToken == 'c'){ //C-->caB
+	else if(nextChar == 'c'){ //C-->caB
 		lex();
-		if(nextToken == 'a')
+		if(nextChar == 'a')
 			lex();
 		else
-			error();
+			error("For rule C--caB, input should started with 'ca'. ");
 		B();
 	}
 	else
-		error();
+		error("For rule C-->aaA|b|caB, input should started with 'a', 'b' or 'c'. ");
 
 	pringtf("Exit <C>");
+}
+
+void error(char errorMessage[]){
+	printf("Error occurred when with input char: %s, message: %s", nextChar, errorMessage);
 }
