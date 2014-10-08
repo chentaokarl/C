@@ -4,7 +4,8 @@
  Author      : Chen Tao (Karl)
  Description : Rules from problem 1:
  	 	 	 	 A-->aB|b|cBB
- 	 	 	 	 B-->aB|bA|cBb (corrected the original rule B-->aB|bA|aBb)
+ 	 	 	 	 B-->bA|aBD (fixed the original rule B-->aB|bA|aBb)
+ 	 	 	 	 D-->¦Å|b (¦Å is empty string)
  	 	 	 	 C-->aaA|b|caB
  ============================================================================
  */
@@ -24,8 +25,9 @@ void getChar();     //get next char from file
 void getNonBlank(); //get next non blank char
 int lex(); 			//judge if the char is legal
 void A();			//parse rule A-->aB|b|cBB
-void B();			//parse rule B-->aB|bA|cBb
+void B();			//parse rule B-->bA|aBD
 void C();			//parse rule C-->aaA|b|caB
+void D();			//parse rule D-->¦Å|b (¦Å is empty string. fixed the original rule B-->aB|bA|aBb)
 void error(char[]); //print detail error message to user
 
 /* Character classes */
@@ -71,7 +73,7 @@ void lex() {
 		case LETTER:
 			break;
 		case UNKNOWN:
-			error("Only lower case letter can be parsed");
+			error("Only lower case letter can be parsed. Cannot parse " + nextChar);
 			while (charClass != LETTER)
 				getChar();
 			break;
@@ -112,23 +114,16 @@ void A(){
 void B(){
 	printf("Enter <B>");
 
-	/* Determine which RHS   B-->aB|bA|cBb */
-	if(nextChar == 'a'){ //B-->aB
+	/* Determine which RHS   B-->bA|aBD */
+	if(nextChar == 'a'){ //B-->aBD
 		/* get the next token */
 		lex();
 		B();
+		D();
 	}
 	else if(nextChar == 'b'){ //B-->bA
 		lex();
 		A();
-	}
-	else if(nextChar == 'c'){ //B-->cBb
-		lex();
-		B();
-		if(nextChar == 'b')
-			lex();
-		else
-			error("For rule B-->cBb should ended with letter 'b'.");
 	}
 	else
 		error("For rule B-->aB|bA|cBb, input should started with 'a', 'b' or 'c'. ");
@@ -168,6 +163,25 @@ void C(){
 	pringtf("Exit <C>");
 }
 
+/*****************************************************/
+void D(){
+	printf("Enter <D>");
+
+		/* Determine which RHS   D-->¦Å|b (¦Å is empty string) */
+		if(nextChar == EOF){ //D--¦Å
+
+		}
+		else if(nextChar == 'b'){ //D-->b
+			lex();
+		}
+		else
+			error("For rule D-->¦Å|b, input should be 'b' or empty ");
+
+		pringtf("Exit <D>");
+}
+
 void error(char errorMessage[]){
 	printf("Error occurred when with input char: %s, message: %s", nextChar, errorMessage);
 }
+
+
